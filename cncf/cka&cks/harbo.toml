@@ -1,0 +1,28 @@
+    [plugins.cri.registry.mirrors."docker.io"]
+      endpoint = ["https://harbor.mutual.k8s.internal/v2/mirrors/docker.io", "https://registry.service.cs.internal:5000/v2/docker.io"]
+    [plugins.cri.registry.mirrors."quay.io"]
+      endpoint = ["https://harbor.mutual.k8s.internal/v2/mirrors/quay.io", "https://registry.service.cs.internal:5000/v2/quay.io"]
+    [plugins.cri.registry.mirrors."k8s.gcr.io"]
+      endpoint = ["https://harbor.mutual.k8s.internal/v2/mirrors/k8s.gcr.io", "https://registry.service.cs.internal:5000/v2/k8s.gcr.io"]
+
+config_path = "/etc/containerd/certs.d"
+---
+$ tree /etc/containerd/certs.d
+/etc/containerd/certs.d
+└── docker.io
+    └── hosts.toml
+
+$ cat /etc/containerd/certs.d/docker.io/hosts.toml
+server = "https://docker.io"
+
+[host."https://registry-1.docker.io"]
+  capabilities = ["pull", "resolve"]
+
+---
+To specify a custom certificate:
+
+$ cat /etc/containerd/certs.d/192.168.12.34:5000/hosts.toml
+server = "https://192.168.12.34:5000"
+
+[host."https://192.168.12.34:5000"]
+  ca = "/path/to/ca.crt"

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment    # 设置类型
+metadata:
+  name: nginx-deployment
+  namespace: samples
+spec:
+  replicas: 3       # 设置副本数量，修改副本数量实现扩缩容
+  selector:
+    matchLabels:
+      run: nginx-pod
+  template:         # 设置模板
+    metadata:
+      labels:
+        run: nginx-pod
+    spec:
+      containers:
+      - name: nginx-c
+        image: nginx:1.21
+        ports:
+        - containerPort: 80
+        resources:   # 必须配置资源限制
+          limits:    # 限制最高使用cpu
+            cpu: 300m
+          requests:  # 限制请求cpu
+            cpu: 100m
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: samples
+  labels:
+    run: nginx-service
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+  selector:
+    run: nginx-service

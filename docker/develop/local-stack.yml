@@ -1,0 +1,99 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:1.21
+    restart: always
+    ports:
+      - "8080:80"
+      - "8088:8088"
+    environment:
+      - NGINX_PORT=80
+    volumes:
+      - /opt/data/nginx/templates:/etc/nginx/templates
+      - /opt/data/nginx/conf.d:/etc/nginx/conf.d
+      - /opt/data/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - /opt/data/nginx/log:/var/log/nginx
+      - /opt/data/nginx/html:/usr/share/nginx/html:rw
+      - /opt/data/nginx/web:/usr/local/include:rw
+  nexus3:
+    image: sonatype/nexus3:3.38.0
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      NEXUS_CONTEXT: nexus
+      INSTALL4J_ADD_VM_PARAMS: "-Xms512m -Xmx512m -XX:MaxDirectMemorySize=768m -Djava.util.prefs.userRoot=/nexus-data"
+    volumes:
+      ## sudo chown -R 200 /opt/data/nexus
+      - "/opt/data/nexus:/nexus-data"
+  
+  mysql:
+    image: mysql:5.7.36
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Vn_1aas
+    ports:
+      - "3306:3306"
+    volumes:
+      - "/opt/data/mysql:/var/lib/mysql"
+  
+  pg:
+    image: postgres:14.3
+    restart: always
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: password
+      POSTGRES_PASSWORD: Vn_1aas
+    ports:
+      - "5432:5432"
+    volumes:
+      - "/opt/data/postgres:/var/lib/postgresql/data"
+
+  pgis:
+    image: postgis/postgis:14-3.2-alpine
+    restart: always
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: password
+      POSTGRES_PASSWORD: Vn_1aas
+    ports:
+      - "5432:5432"
+    volumes:
+      - "/opt/data/postgres:/var/lib/postgresql/data"
+
+  pgadmin4:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: caojiaqing@cmdi.chinamobile.com
+      PGADMIN_DEFAULT_PASSWORD: Vn_1aas
+    ports:
+      - "5433:80"
+
+  adminer:
+    image: adminer:latest
+    restart: always
+    ports:
+      - "5434:8080"
+  
+  redis:
+    image: redis:6.2.6-alpine
+    restart: always
+    command: redis-server --save 60 1 --loglevel warning --requirepass Vn_1aas
+    ports:
+      - "6379:6379"
+    volumes:
+      - "/opt/data/redis:/data"
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: vrms
+      RABBITMQ_DEFAULT_PASS: Jsdn*#d13
+    volumes:
+      - "/opt/data/rabbitmq:/var/lib/rabbitmq"
+
+

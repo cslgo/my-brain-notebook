@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pod-manual-schedule
+  name: pod-manual-schedule
+  namespace: kube-samples
+spec:
+  nodeName: "ha-cluster-worker2"
+  containers:
+  - name: my-pod
+    image: nginx:1.21

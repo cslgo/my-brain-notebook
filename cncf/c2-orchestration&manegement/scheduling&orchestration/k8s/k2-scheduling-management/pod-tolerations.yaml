@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pod-tolerations
+  name: pod-tolerations
+  namespace: kube-samples
+spec:
+  containers:
+  - name: my-pod
+    image: nginx:1.21
+  tolerations:
+  - key: gpu
+    operator: Equal
+    value: "yes"
+    effect: NoSchedule
+

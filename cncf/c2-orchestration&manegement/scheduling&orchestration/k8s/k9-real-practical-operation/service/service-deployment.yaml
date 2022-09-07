@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-deployment
+  namespace: samples
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-web
+  template:
+    metadata:
+      labels:
+        app: nginx-web
+    spec:
+      containers:
+      - name: nginx-c
+        image: nginx:1.21
+        lifecycle:   # 启动后执行命令生成一个页面
+          postStart:
+            exec:
+              command: 
+              - "/bin/bash"
+              - "-c"
+              - "echo `date +%F' '%T' '%A ;echo ${RANDOM}${RANDOM} |md5sum` > /usr/share/nginx/html/index.html"
+        ports:
+        - name: nginx-web-port
+          containerPort: 80
+          protocol: TCP

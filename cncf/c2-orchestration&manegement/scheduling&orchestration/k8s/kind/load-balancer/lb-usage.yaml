@@ -1,0 +1,53 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: lb1-app
+  labels:
+    app: http-echo
+spec:
+  containers:
+  - name: lb1-app
+    image: hashicorp/http-echo:0.2.3
+    args:
+    - "-text=foo"
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: lb2-app
+  labels:
+    app: http-echo
+spec:
+  containers:
+  - name: lb2-app
+    image: hashicorp/http-echo:0.2.3
+    args:
+    - "-text=bar"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: lb-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: http-echo
+  ports:
+  # Default port used by the image
+  - port: 5678
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lb-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: "/lb"
+        backend:
+          service:
+            name: lb-service
+            port:
+              number: 5678

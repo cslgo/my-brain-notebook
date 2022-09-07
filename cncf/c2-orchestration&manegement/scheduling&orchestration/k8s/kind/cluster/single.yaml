@@ -1,0 +1,12 @@
+# cluster-config.yml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: single-cluster
+nodes:
+- role: control-plane
+  image: kindest/node:v1.23.5
+  extraPortMappings:
+  - containerPort: 30000
+    hostPort: 30000
+    protocol: TCP # Optional, defaults to tcp
+    listenAddress: "0.0.0.0" # Optional, defaults to "0.0.0.0"

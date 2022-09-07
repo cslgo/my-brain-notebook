@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-name-service
+  namespace: samples
+spec:
+  selector:
+    app: nginx-web
+  type:  ExternalName
+  externalName: www.baidu.com

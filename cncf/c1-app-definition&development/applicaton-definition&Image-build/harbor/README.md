@@ -1,0 +1,167 @@
+Harbor Using
+===
+
+
+## Installing
+
+```bash
+wget https://github.com/goharbor/harbor/releases/download/v2.5.3/harbor-offline-installer-v2.5.3.tgz
+```
+
+## Configure HTTPS Access to Harbor
+
+### Generate a Certificate Authority Certificate
+
+``` bash
+sudo mkdir -p /etc/harbor/pki
+cd /etc/harbor/pki
+```
+
+1. Generate a CA certificate private key
+
+``` bash
+sudo mkdir -p /etc/harbor/pki
+cd /etc/harbor/pki
+sudo openssl genrsa -out ca.key 4096
+```
+
+2. Generate the CA certificate.
+
+Adapt the values in the `-subj` option to reflect your organization. If you use an FQDN to connect your Harbor host, you must specify it as the common name (CN) attribute.
+
+```bash
+sudo openssl req -x509 -new -nodes -sha512 -days 3650 \
+ -subj "/C=CN/ST=Beijing/L=Beijing/O=K8s/OU=Personal/CN=registry.k8s.local" \
+ -key ca.key \
+ -out ca.crt
+```
+
+**Optional Practical advice: Using K8s PKI ca instead**
+
+```bash
+sudo scp root@10.10.10.23:/etc/kubernetes/pki/ca.key ca.key
+sudo scp root@10.10.10.23:/etc/kubernetes/pki/ca.crt ca.crt
+```
+
+### Generate a Server Certificate
+
+1. Generate a private key.
+
+```bash
+sudo openssl genrsa -out registry.k8s.local.key 4096
+```
+
+2. Generate a certificate signing request (CSR).
+
+Adapt the values in the -subj option to reflect your organization. If you use an FQDN to connect your Harbor host, you must specify it as the common name (CN) attribute and use it in the key and CSR filenames.
+
+```bash
+sudo openssl req -sha512 -new \
+    -subj "/C=CN/ST=Beijing/L=Beijing/O=K8s/OU=Personal/CN=registry.k8s.local" \
+    -key registry.k8s.local.key \
+    -out registry.k8s.local.csr
+```
+
+3. Generate an x509 v3 extension file.
+
+Regardless of whether you’re using either an FQDN or an IP address to connect to your Harbor host, you must create this file so that you can generate a certificate for your Harbor host that complies with the Subject Alternative Name (SAN) and x509 v3 extension requirements. Replace the DNS entries to reflect your domain.
+
+```bash
+cat <<-EOF | sudo tee v3.ext
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1=registry.k8s.local
+DNS.2=centos-node0
+EOF
+```
+
+4. Use the v3.ext file to generate a certificate for your Harbor host.
+
+Replace the registry.k8s.local in the CRS and CRT file names with the Harbor host name.
+
+```bash
+sudo openssl x509 -req -sha512 -days 3650 \
+    -extfile v3.ext \
+    -CA ca.crt -CAkey ca.key -CAcreateserial \
+    -in registry.k8s.local.csr \
+    -out registry.k8s.local.crt
+```
+
+### Provide the Certificates to Harbor and Docker
+
+After generating the ca.crt, registry.k8s.local.crt, and registry.k8s.local.key files, you must provide them to Harbor and to Docker, and reconfigure Harbor to use them.
+
+1. Copy the server certificate and key into the certficates folder on your Harbor host.
+
+```bash
+sudo mkdir -p /data/cert/
+sudo cp registry.k8s.local.crt /data/cert/
+sudo cp registry.k8s.local.key /data/cert/
+```
+
+1. Convert registry.k8s.local.crt to registry.k8s.local.cert, for use by Docker.
+
+The Docker daemon interprets .crt files as CA certificates and .cert files as client certificates.
+
+```bash
+sudo openssl x509 -inform PEM -in registry.k8s.local.crt -out registry.k8s.local.cert
+```
+
+3. Copy the server certificate, key and CA files into the Docker certificates folder on the Harbor host. You must create the appropriate folders first.
+
+```bash
+sudo mkdir -p /etc/docker/certs.d/registry.k8s.local/
+sudo cp registry.k8s.local.cert /etc/docker/certs.d/registry.k8s.local/
+sudo cp registry.k8s.local.key /etc/docker/certs.d/registry.k8s.local/
+sudo cp ca.crt /etc/docker/certs.d/registry.k8s.local/
+```
+
+If you mapped the default nginx port 443 to a different port, create the folder /etc/docker/certs.d/registry.k8s.local:port, or /etc/docker/certs.d/harbor_IP:port.
+
+4. Restart Docker Engine.
+
+```bash
+sudo systemctl restart docker
+```
+
+You might also need to trust the certificate at the OS level. See Troubleshooting Harbor Installation for more information.
+
+The following example illustrates a configuration that uses custom certificates.
+
+```bash
+/etc/docker/certs.d/
+    └── registry.k8s.local:port
+       ├── registry.k8s.local.cert  <-- Server certificate signed by CA
+       ├── registry.k8s.local.key   <-- Server key signed by CA
+       └── ca.crt               <-- Certificate authority that signed the registry certificate
+```
+
+### Deploy or Reconfigure Harbor
+
+## Configure Internal TLS communication between Harbor Component
+
+This functionality is introduced via the internal_tls in harbor.yml file. To enabled internal TLS, set enabled to true and set the dir value to the path of directory that contains the internal cert files.
+
+All certs can be automatically generated by prepare tool.
+
+```bash
+sudo mkdir -p /etc/harbor/internal/tls/cert
+sudo cp /etc/kubernetes/pki/ca.key /etc/harbor/internal/tls/cert/harbor_internal_ca.key
+sudo cp /etc/kubernetes/pki/ca.crt /etc/harbor/internal/tls/cert/harbor_internal_ca.crt
+sudo docker run -v /:/hostfs goharbor/prepare:v2.1.0 gencert -p /etc/harbor/internal/tls/cert
+```
+
+## Configure the Harbor YML File
+
+You set system level parameters for Harbor in the harbor.yml file that is contained in the installer package. These parameters take effect when you run the install.sh script to install or reconfigure Harbor.
+
+After the initial deployment and after you have started Harbor, you perform additional configuration in the Harbor Web Portal.
+
+## Reference
+
+[1] Office https://goharbor.io/docs/2.5.0/install-config/

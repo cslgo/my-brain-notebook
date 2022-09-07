@@ -1,0 +1,44 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: wordpress-https
+  namespace: kube-samples
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`wordpress.qikqiak.com`)
+    kind: Rule
+    services:
+    - name: wordpress
+      port: 80
+  tls:
+    certResolver: ali
+    domains:
+    - main: "*.qikqiak.com"
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-https
+  namespace: kube-samples
+spec:
+  redirectScheme:
+    scheme: https
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: wordpress-http
+  namespace: kube-samples
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`wordpress.qikqiak.com`)
+    kind: Rule
+    services:
+    - name: wordpress
+      port: 80
+    middlewares: 
+    - name: redirect-https

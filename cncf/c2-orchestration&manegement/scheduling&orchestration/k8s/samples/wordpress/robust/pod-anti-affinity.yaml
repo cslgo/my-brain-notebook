@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata: 
+  labels:
+    run: pod-anti-affinity
+  name: pod-anti-affinity
+  namespace: kube-samples
+spec:
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:  # 软策略
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - wordpress

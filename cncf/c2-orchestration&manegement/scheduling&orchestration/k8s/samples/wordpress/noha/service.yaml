@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress
+  namespace: kube-samples
+spec:
+  selector:
+    app: wordpress
+  type: NodePort
+  ports:
+  - name: web
+    port: 80
+    targetPort: wdport

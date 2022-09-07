@@ -1,0 +1,34 @@
+# 实现 ns-one 名称空间的 pod，访问 ns-two 名称空间的 Service：ns-two-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ns-one-service-external-name
+  namespace: ns-one
+spec:
+  selector:
+    app: "ns-one-pod"
+    release: "v1"
+  type: ExternalName
+  externalName: ns-two-service.ns-two.svc.cluster.local
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+---
+# 实现 ns-two 名称空间的 pod，访问 ns-one 名称空间的 service：ns-one-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ns-two-service-external-name
+  namespace: ns-two
+spec:
+  selector:
+    app: "ns-two-pod"
+    release: "v2"
+  type: ExternalName
+  externalName: ns-one-service.ns-one.svc.cluster.local
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wordpress-pvc
+  namespace: kube-samples
+  labels:
+    app: wordpress
+spec:
+  storageClassName: csi-cephfs
+  accessModes:
+  - ReadWriteMany  # 由于是多个Pod所以要用 RWM
+  resources:
+    requests:
+      storage: 2Gi

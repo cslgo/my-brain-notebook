@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cluster-ip-service
+  namespace: samples
+spec:
+  sessionAffinity: ClientIP     # 设置亲和性，改变访问规则
+  selector:
+    app: nginx-web
+  clusterIP:               # service 的 ip 地址，如果不写，默认生成一个
+  type: ClusterIP
+  ports:
+  - port: 80            # Service端口
+    targetPort: 80      # pod 端口，必须是服务程序运行的端口，否则无法访问

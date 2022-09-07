@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: load-balnacer-service
+  namespace: samples
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: nginx-web
+  type: LoadBalancer   # 服务类型为 LoadBalancer
+  externalIPs:  # 配置外部ip地址
+    - 10.0.0.16     # service 允许为其分配一个公有IP

@@ -1,0 +1,34 @@
+# make four node (one contral plane & three workers) cluster config
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: lb-cluster
+networking:
+  # You can configure the subnet used for pod IPs by setting
+  podSubnet: "10.244.0.0/16"
+  # You can configure the Kubernetes service subnet used for service IPs by setting
+  serviceSubnet: "10.96.0.0/12"
+  kubeProxyMode: "ipvs"
+nodes:
+- role: control-plane
+  image: kindest/node:v1.23.5
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 80
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 443
+    protocol: TCP
+  - containerPort: 5678
+    hostPort: 5678
+- role: worker
+  image: kindest/node:v1.23.5
+- role: worker
+  image: kindest/node:v1.23.5
+- role: worker
+  image: kindest/node:v1.23.5

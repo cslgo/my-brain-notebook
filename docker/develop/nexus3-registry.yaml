@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  nexus3:
+    image: sonatype/nexus3:3.38.0
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      NEXUS_CONTEXT: nexus
+      INSTALL4J_ADD_VM_PARAMS: "-Xms512m -Xmx512m -XX:MaxDirectMemorySize=768m -Djava.util.prefs.userRoot=/nexus-data"
+    volumes:
+      ## sudo chown -R 200 /opt/data/nexus
+      - /opt/data/nexus:/nexus-data
+  # https://yeasy.gitbook.io/docker_practice/repository/registry
+  registry:
+    image: registry:2.8
+    restart: always
+    ports:
+      - "443:443"
+    volumes:
+      - ./registry:/etc/docker/registry
+      - /opt/data/registry:/var/lib/registry

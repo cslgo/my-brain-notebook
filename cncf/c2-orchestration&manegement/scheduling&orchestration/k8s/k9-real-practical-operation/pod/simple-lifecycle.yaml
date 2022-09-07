@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-pod
+  namespace: samples
+  labels:
+    run: simple-pod
+spec:
+  containers:
+  - name: nginx-c
+    image: nginx:1.21
+    lifecycle:
+      postStart:
+        exec:    # 在容器启动时，执行一个命令  列表写法1
+          command: ["/bin/bash","-c","echo 'postStart....hello nginx' > /usr/share/nginx/html/index.html"]
+      preStop:   # 在容器终止时，停止nginx服务
+        exec:
+          command:  # 列表的写法2 [推荐写成yaml列表式]# 等同于command: ["/bin/bash","-s","quit"]
+          - "/bin/bash"
+          - "-s"
+          - "quit"

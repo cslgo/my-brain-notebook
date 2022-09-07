@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: DaemonSet    # 设置类型
+metadata:
+  name: nginx-ds
+  namespace: samples
+spec:
+  selector:
+    matchLabels:
+      run: nginx-d
+  template:         # 设置模板
+    metadata:
+      labels:
+        run: nginx-d
+    spec:
+      containers:
+      - name: nginx-dc
+        image: nginx:1.21

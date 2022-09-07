@@ -1,0 +1,1 @@
+[Kubeadm Setup](https://kubernetes.io/docs/reference/setup-tools/kubeadm/)

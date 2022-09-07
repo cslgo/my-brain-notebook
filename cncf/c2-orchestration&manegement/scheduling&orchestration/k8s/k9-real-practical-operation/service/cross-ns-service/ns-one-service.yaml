@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-one
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ns-one-dep
+  namespace: ns-one
+  labels:
+    app: ns-one-dep
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ns-one-pod
+      release: v1
+  template:
+    metadata:
+      labels:
+        app: ns-one-pod
+        release: v1
+    spec:
+      containers:
+      - name: ns-one-centos-c
+        image: centos:7.9.2009
+        imagePullPolicy: IfNotPresent
+        command:
+        - "/sbin/init"
+        env:  # 设置容器环境变量
+        - name: "webpath"
+          value: "/usr/share/nginx/html"
+        - name: "fstime"
+          value: "date +%F' '%T' '%N' '%A"
+        lifecycle:
+          postStart:
+            exec:
+              command: 
+              - "/bin/bash"
+              - "-c"
+              - "mkdir -p ${webpath};echo `eval ${fstime};echo ${RANDOM}${RANDOM}|md5sum;echo 'mynginx'` > ${webpath}/index.html;cat /etc/hosts >> ${webpath}/index.html;cat /etc/hosts > ${webpath}/index2.html"  
+        ports:
+        - name: http
+          containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ns-one-service
+  namespace: ns-one
+  labels:
+    app: ns-one-service
+spec:
+  type: ClusterIP  # 默认类型
+  selector:
+    app: ns-one-pod
+    release: v1
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+

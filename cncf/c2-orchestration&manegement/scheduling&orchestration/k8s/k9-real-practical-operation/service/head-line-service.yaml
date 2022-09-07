@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: head-line-service
+  namespace: samples
+spec:
+  selector:
+    app: nginx-web
+  clusterIP: None            # 设置为None，创建 headline
+  type: ClusterIP
+  ports:
+  - port: 80            # Service 端口
+    targetPort: 80      # pod 端口，必须是服务程序运行的端口，否则无法访问

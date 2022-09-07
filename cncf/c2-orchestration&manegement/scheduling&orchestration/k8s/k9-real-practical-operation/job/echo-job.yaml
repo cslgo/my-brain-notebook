@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: echo-job
+  namespace: samples
+spec:
+  manualSelector: true
+  completions: 9  # 指定 job 需要成功运行 pods 的次数，默认值为 1
+  parallelism: 3  # 指定 job 在任一时刻应该并发运行 pods 的数量，默认值为 1
+  selector:
+    matchLabels:
+      app: job-pod
+  template:
+    metadata:
+      labels:
+        app: job-pod
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: echo-c
+        image: centos:7.9.2009
+        command:    # ["/bin/sh","-c","for i in 10 9 8 7 6 5 4 3 2 1; do echo ${i}; sleep 2; done"]
+        - "/bin/sh"
+        - "-c"
+        - "for i in $(seq 1 10); do echo ${i}; sleep 0.5; done"

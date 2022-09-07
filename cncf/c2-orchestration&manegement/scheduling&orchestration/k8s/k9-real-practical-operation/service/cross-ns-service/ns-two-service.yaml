@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-two
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ns-two-dep
+  namespace: ns-two
+  labels:
+    app: ns-two-dep
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ns-two-pod
+      release: v2
+  template:
+    metadata:
+      labels:
+        app: ns-two-pod
+        release: v2
+    spec:
+      containers:
+      - name: ns-two-centos-c
+        image: centos:7.9.2009
+        imagePullPolicy: IfNotPresent
+        command:
+        - "/sbin/init"
+        env:  # 设置容器环境变量
+        - name: "webpath"
+          value: "/usr/share/nginx/html"
+        - name: "fstime"
+          value: "date +%F' '%T' '%N' '%A"
+        lifecycle:
+          postStart:
+            exec:
+              command: 
+              - "/bin/bash"
+              - "-c"
+              - "mkdir -p ${webpath};echo `eval ${fstime};echo ${RANDOM}${RANDOM}|md5sum;echo 'mynginx'` > ${webpath}/index.html;cat /etc/hosts >> ${webpath}/index.html;cat /etc/hosts > ${webpath}/index2.html"  
+        ports:
+        - name: http
+          containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ns-two-service
+  namespace: ns-two
+  labels:
+    app: ns-two-service
+spec:
+  type: ClusterIP  # 默认类型
+  selector:
+    app: ns-two-pod
+    release: v2
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
