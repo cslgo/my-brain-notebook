@@ -58,3 +58,28 @@ make -j2 KCONFIG_CONFIG=Microsoft/config-wsl
 # From the host terminal copy the newly built kernel
 docker cp wsl-kernel-builder:/src/arch/x86/boot/bzImage .
 ```
+
+## 配置 Systemd
+
+由于默认情况下 WSL 中不能使用 systemd，所以很多应用程序没办法启动，不过还是有一些大神解决了这个问题，我们可以在 https://forum.snapcraft.io/t/running-snaps-on-wsl2-insiders-only-for-now/13033 链接下面找到启动 SystemD 的方法。
+
+首先安装 Systemd 相关的依赖应用
+
+    apt install -yqq fontconfig daemonize
+
+然后创建一个如下所示的脚本文件：
+
+```shell
+# Create the starting script for SystemD
+$ sudo vim /etc/profile.d/00-wsl2-systemd.sh
+SYSTEMD_PID=$(ps -ef | grep '/lib/systemd/systemd --system-unit=basic.target$' | grep -v unshare | awk '{print $2}')
+
+if [ -z "$SYSTEMD_PID" ]; then
+   sudo /usr/bin/daemonize /usr/bin/unshare --fork --pid --mount-proc /lib/systemd/systemd --system-unit=basic.target
+   SYSTEMD_PID=$(ps -ef | grep '/lib/systemd/systemd --system-unit=basic.target$' | grep -v unshare | awk '{print $2}')
+fi
+
+if [ -n "$SYSTEMD_PID" ] && [ "$SYSTEMD_PID" != "1" ]; then
+    exec sudo /usr/bin/nsenter -t $SYSTEMD_PID -a su - $LOGNAME
+fi
+```
