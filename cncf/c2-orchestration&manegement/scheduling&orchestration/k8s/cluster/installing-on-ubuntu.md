@@ -145,8 +145,17 @@ Configuring the systemd cgroup driver
 To use the systemd cgroup driver in /etc/containerd/config.toml with runc, set
 ```yaml
       [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+        # 如下这些仓库可以作为公共仓库使用
         [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
-          endpoint = ["https://b9pmyelo.mirror.aliyuncs.com"]
+            endpoint = ["https://docker.mirrors.ustc.edu.cn","http://hub-mirror.c.163.com","https://b9pmyelo.mirror.aliyuncs.com"]
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."gcr.io"]
+            endpoint = ["https://gcr.mirrors.ustc.edu.cn"]
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."k8s.gcr.io"]
+            endpoint = ["https://gcr.mirrors.ustc.edu.cn/google-containers/"]
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.k8s.io"]
+            endpoint = ["https://gcr.mirrors.ustc.edu.cn/google-containers/"]
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."quay.io"]
+            endpoint = ["https://quay.mirrors.ustc.edu.cn"]
 ```
 
 ```bash
