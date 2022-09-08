@@ -26,22 +26,27 @@ $ git config --global core.editor vim
 ```
 ### autocrlf safecrlf
 
+建议配置
+```shell
+# for windows
+git config --global core.autocrlf true
+# for linux or macos
+git config --global core.autocrlf false
+git config --global core.safecrlf true
+```
+
+更多细节
 ```
 ## 提交时转换LF，检出时转换成CRLF
 git config --global core.autocrlf true
-
 ## 提交时转换LF，检出时不转换
 git config --global core.autocrlf input
-
 ## 提交时转换LF，检出时不转换
 git config --global core.autocrlf false
-
 ## 拒接提交包含混合换行符的文件
 git config --global core.safecrlf true
-
 ## 允许提交包含混合换行符的文件
 git config --global core.safecrlf false
-
 ## 提交包含混合换行符的文件给出报警
 git config --global core.safecrlf warn
 

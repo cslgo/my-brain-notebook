@@ -10,3 +10,31 @@ https://github.com/spf13/cobra
 https://github.com/spf13/cobra-cli/blob/main/README.md
 
 https://github.com/spf13/cobra/blob/master/user_guide.md
+
+## Quick Start
+
+快速生成项目
+```bash
+# init a go module app
+mkdir cobra-demo
+cd cobra-demo
+go mod init github.com/cslgo/cobra-demo
+
+# cobra app generator tool
+go install github.com/spf13/cobra-cli@latest
+cobra-cli init --author "caojiaqing.app@gmail.com" --license apache
+cobra-cli add create
+go run main.go create
+
+```
+
+编码依赖
+```bash
+# cobra lib
+go get -u github.com/spf13/cobra@latest
+
+# import in go files
+import "github.com/spf13/cobra"
+
+```
+
