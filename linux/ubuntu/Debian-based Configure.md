@@ -1,10 +1,32 @@
 Debian-based Linux Configure
 ===
+## 安装 VMware Tools 
+
+配置 CD/DVD
+Applications/VMware Fusion.app/Contents/Library/isoimages/linux.iso
+mv vmware-tools-distrib.tar.gz ~/Documents
+```bash
+cd ~/Documents
+chmod +x vmware-tools-distrib.tar.gz
+tar zxvf vmware-tools-distrib.tar.gz
+cd vmware-tools-distrib
+sudo ./vmware-install.pl
+```
+
+macOS安装虚拟机，上述安装后不起作用， 可以考虑使用其一个开源子集实现 open-vm-tools 及 open-vm-tools-desktop，简单省事！
+
+```
+sudo apt update && sudo apt upgrade
+sudo apt install open-vm-tools
+sudo apt install open-vm-tools-desktop
+reboot
+```
 
 ## 更改源
 
 中科大
 ```bash
+sudo mv tee /etc/apt/sources.list tee /etc/apt/sources.list.bak
 sudo cat <<EOF | sudo tee /etc/apt/sources.list
 deb https://mirrors.ustc.edu.cn/ubuntu/ jammy main restricted universe multiverse
 deb-src https://mirrors.ustc.edu.cn/ubuntu/ jammy main restricted universe multiverse
@@ -102,8 +124,21 @@ sudo apt update && sudo apt upgrade -y
 ```
 ## 安装 zsh
 
+https://vitux.com/ubuntu-zsh-shell/
+
 ```shell
-root@k8s:~# apt install zsh
+sudo apt update && sudo apt dist-upgrade -y
+sudo apt install -y build-essential curl file git
+sudo apt install -y zsh
+zsh --version
+sudo apt install fonts-powerline
+git clone --depth=1 https://gitee.com/romkatv/powerlevel10k.git ~/powerlevel10k
+echo 'source ~/powerlevel10k/powerlevel10k.zsh-theme' >>~/.zshrc
+# First, change the shell for Root:
+sudo -s
+chsh -s /bin/zsh root
+chsh -s /bin/zsh slcho
+reboot
 ```
 ## 安装 oh-my-zsh
 
